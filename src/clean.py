@@ -10,7 +10,9 @@ unicode_conversion = {
     '\u2014': '-',
     '\u00a0': ' ',
     '\u2026': '...',
-    '&amp;': '&'
+    '&amp;': '&',
+    '&amp,': '&',
+    '&amp': '&'
 }
 
 def clean_data(raw_file, parsed_file):

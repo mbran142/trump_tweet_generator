@@ -1,6 +1,7 @@
 from clean import clean_data
 from train import build_and_train_model
 import sys
+import os
 import argparse
 
 if __name__ == '__main__':
@@ -70,9 +71,18 @@ if __name__ == '__main__':
                 # train model on parsed file
                 print('Training model using config file ' + config_file + ' on parsed data file ' + parsed_filename + '...')
 
-                # TODO: check if all files exists
-                # config file
-                # parsed filename
-                # if either don't exist, report error and exist
+                # check if all files exists
+                file_error = False
+                if not os.path.isfile('data/' + parsed_filename):
+                    print('Error: ' + parsed_filename + ' not found.')
+                    file_error = True
+                
+                if not os.path.isfile('models/config/' + config_file):
+                    print('Error: ' + config_file + ' not found.')
+                    file_error = True
 
+                if file_error:
+                    exit(1)
+
+                # train model
                 build_and_train_model(config_file, parsed_filename)
