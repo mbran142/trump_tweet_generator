@@ -10,7 +10,11 @@
             "request": "launch",
             "program": "${file}",
             "console": "externalTerminal",
-            "pythonPath": "${config:python.interpreterPath}"
+            "pythonPath": "${config:python.interpreterPath}",
+            "args": [
+                "-p",
+                "parsed_data.json"
+            ]
         }
     ]
 }

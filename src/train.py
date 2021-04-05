@@ -6,6 +6,7 @@ import pdb
 import torch
 from torch.utils.data import DataLoader
 from copy import deepcopy
+import traceback
 
 def build_and_train_model(config_file, parsed_filename):
     
@@ -48,8 +49,8 @@ def build_and_train_model(config_file, parsed_filename):
 
         for epoch in range(config['training']['epochs']):
 
-            train_losses.append(get_loss(model, train_dataloader, device, optimizer, config['training']['batch_size'], criterion))                 # train model
-            val_losses.append(get_loss(model, val_dataloader, device, optimizer, config['training']['batch_size'], criterion, train = False))      # validation
+            train_losses.append(get_loss(model, train_dataloader, device, optimizer, criterion, config['training']['batch_size']))                 # train model
+            val_losses.append(get_loss(model, val_dataloader, device, optimizer, criterion, config['training']['batch_size'], train = False))      # validation
 
             print(f'Epoch {epoch + 1}: training loss = {train_losses[-1]} | validation loss = {val_losses[-1]}')
 
@@ -77,6 +78,7 @@ def build_and_train_model(config_file, parsed_filename):
     except Exception as e:
         print('--- ERROR DURING TRAINING ---')
         print(e)
+        traceback.print_exc()
         return False
 
     return True
@@ -84,6 +86,10 @@ def build_and_train_model(config_file, parsed_filename):
 
 # get loss value on input dataset. Used for both training and validation
 def get_loss(model, dataset, device, optimizer, criterion, batch_size, train = True):
+
+    num_iterations = len(dataset) // batch_size
+    print('Training:' if train else 'Validation:', f'{num_iterations} iterations.')
+    print('.' * num_iterations)
 
     loss_val = 0
 
@@ -93,12 +99,16 @@ def get_loss(model, dataset, device, optimizer, criterion, batch_size, train = T
             optimizer.zero_grad()
 
         tweet = tweet.to(device)
+
         outputs = model(tweet, train = True)
-        loss = criterion(torch.flatten(outputs[:, :-1, :], 0, 1), torch.flatten(tweet))
+        loss = criterion(torch.flatten(outputs, 0, 1), torch.flatten(tweet))
         loss_val += loss.item()
         
-        loss.backward()
-        optimizer.step()
+        if train:
+            loss.backward()
+            optimizer.step()
+
+        print('.')
 
     loss_val = loss_val / (len(dataset) / batch_size)
     return loss_val

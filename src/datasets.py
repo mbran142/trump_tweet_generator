@@ -34,6 +34,7 @@ def build_tweet_datasets(tweet_filename, ratio = 0.2):
     tweet_data = [[ord(char) for char in tweet] for tweet in tweet_data]
     tweet_data = [tweet + [ 128 ] * (280 - len(tweet)) for tweet in tweet_data]     # append padding to all tweets
     tweet_data = torch.tensor(tweet_data)
+    # tweet_data = torch.FloatTensor(tweet_data)
 
     size = len(tweet_data)
 

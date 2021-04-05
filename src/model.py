@@ -7,6 +7,7 @@ import pdb
 class tweet_model(nn.Module):
 
     def __init__(self, config):
+        
         super(tweet_model, self).__init__()
 
         self.timesteps = 280  # max tweet length is 280
@@ -16,9 +17,11 @@ class tweet_model(nn.Module):
         hidden_size = config['model']['hidden_size']
         num_layers = config['model']['num_layers']
         
-        self.embed = nn.Embedding(vocab_size, embed_size)
+        self.embed = nn.Embedding(self.vocab_size, embed_size)
         self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size, self.vocab_size)
+
+        nn.init.xavier_uniform_(self.fc.weight)
 
 
     # expects encoded tweets in 1D tensor form (up to 280 length)
@@ -33,7 +36,6 @@ class tweet_model(nn.Module):
 
             return fc_out
 
-        
         # utilize trained model
         else:
 
