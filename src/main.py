@@ -1,5 +1,6 @@
 from clean import clean_data
 from train import build_and_train_model
+from generate import use_model
 import pdb
 import sys
 import os
@@ -19,10 +20,21 @@ if __name__ == '__main__':
     # generate tweets using trained model
     if args.trained:
 
-        print('TODO: use trained model here')
-        # HANDLE TRAINED MODEL LOGIC HERE:
-        # crash program if -c, -r, -p are provided or if -n is not provided
-        # otherwise, load the model using the provided filename and begin the tweet-generating user input
+        if args.name is None:
+            name = 'default'
+        else:
+            name = args.name
+
+        if not os.path.isfile('models/config/' + name + '.json'):
+            print('Error: ' + name + '.json not found.')
+            exit(1)
+
+        elif not os.path.isfile('models/trained/' + name + '.pt'):
+            print('Error: ' + name + '.pt not found.')
+            exit(1)
+
+        print(f'Using model {name}.')
+        use_model(name)
 
     else: 
 

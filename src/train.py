@@ -55,7 +55,7 @@ def build_and_train_model(config_file, parsed_filename):
             print(f'Epoch {epoch + 1}: training loss = {train_losses[-1]} | validation loss = {val_losses[-1]}')
 
             # consider early stopping
-            if epoch <= 1 and val_losses[-1] > val_losses[-2]:
+            if epoch > 1 and val_losses[-1] > val_losses[-2]:
 
                 violation += 1
 
@@ -73,7 +73,9 @@ def build_and_train_model(config_file, parsed_filename):
 
         print(f'Saving model from {best_epoch} into \'models/trained/{config_file[ : -5]}\'')
 
-        torch.save(best_model, 'models/trained/' + config_file[ : -5])
+        model_path = 'models/trained/' + config_file[:-5] + '.pt'
+        state_dict = {'model': best_model.state_dict(), 'optimizer': optimizer.state_dict()}
+        torch.save(state_dict, model_path)
 
     except Exception as e:
         print('--- ERROR DURING TRAINING ---')
@@ -85,15 +87,15 @@ def build_and_train_model(config_file, parsed_filename):
 
 
 # get loss value on input dataset. Used for both training and validation
-def get_loss(model, dataset, device, optimizer, criterion, batch_size, train = True):
+def get_loss(model, dataloader, device, optimizer, criterion, batch_size, train = True):
 
-    num_iterations = len(dataset) // batch_size
-    print('Training:' if train else 'Validation:', f'{num_iterations} iterations.')
+    num_iterations = (len(dataloader.dataset) - 1) // batch_size + 1
+    print('Training:' if train else 'Validation:', f'{num_iterations} iterations')
     print('.' * num_iterations)
 
     loss_val = 0
 
-    for i, tweet in enumerate(dataset):
+    for i, tweet in enumerate(dataloader):
 
         if train:
             optimizer.zero_grad()
@@ -108,13 +110,8 @@ def get_loss(model, dataset, device, optimizer, criterion, batch_size, train = T
             loss.backward()
             optimizer.step()
 
-        print('.')
+        print('.', end = '')
 
-    loss_val = loss_val / (len(dataset) / batch_size)
+    print('')
+    loss_val = loss_val / (len(dataloader.dataset) / batch_size)
     return loss_val
-
-
-# convert tweet ascii into 1D tensor
-def tweet_to_tensor(tweet):
-
-    return torch.Te

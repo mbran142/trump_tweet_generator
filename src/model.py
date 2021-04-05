@@ -16,7 +16,7 @@ class tweet_model(nn.Module):
         embed_size = config['model']['embedding_size']
         hidden_size = config['model']['hidden_size']
         num_layers = config['model']['num_layers']
-        
+
         self.embed = nn.Embedding(self.vocab_size, embed_size)
         self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size, self.vocab_size)
