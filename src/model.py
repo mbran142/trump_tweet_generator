@@ -12,6 +12,7 @@ class tweet_model(nn.Module):
 
         self.timesteps = 280  # max tweet length is 280
         self.vocab_size = 129 # 0-127 ASCII, 128 = <pad>
+        self.temperature = 0.2
 
         embed_size = config['model']['embedding_size']
         hidden_size = config['model']['hidden_size']
@@ -24,8 +25,23 @@ class tweet_model(nn.Module):
         nn.init.xavier_uniform_(self.fc.weight)
 
 
+    # modify model temperature (default is 0.2)
+    def change_temperature(self, new_temp):
+        self.temperature = new_temp
+
+
+    # choose a character from the distribution the model produces
+    def pick_char(self, distribution):
+        
+        sm = nn.Softmax(dim = 1)
+        distribution = sm(distribution / self.temperature)
+
+        sample = torch.multinomial(torch.squeeze(distribution, 1), num_samples = 1)
+        return sample
+
+
     # expects encoded tweets in 1D tensor form (up to 280 length)
-    def forward(self, encoded_tweet, train = False):
+    def forward(self, encoded_tweet = None, train = False):
 
         # train via teacher forcing
         if train:
@@ -44,9 +60,11 @@ class tweet_model(nn.Module):
 
                 start_len = 0
                 lstm_state = None
-                out_tweet = []
+                out_tweet = torch.IntTensor([])
 
-                pass
+                # randomly choose an alphabetical character to start with
+                char_distrib = torch.tensor(([0] * 64) + ([1] * 26) + ([0] * 6) + ([1] * 26) + ([0] * 7))
+                char_distrib = torch.unsqueeze(char_distrib, 0)
 
             # begin tweet with phrase
             else:
@@ -55,12 +73,22 @@ class tweet_model(nn.Module):
 
                 # feed in the first characters and get the lstm state
                 embedded_tweet = self.embed(encoded_tweet)
-                _, lstm_state = self.lstm()    
+                lstm_out, lstm_state = self.lstm(torch.unsqueeze(embedded_tweet, 0))    
+                char_distrib = self.fc(lstm_out)
+
+                # last character from distribution
+                char_distrib = torch.squeeze(char_distrib, 0)[-1:]
+
                 out_tweet = encoded_tweet
 
             # generate tweet
             for i in range(self.timesteps - start_len):
+                
+                next_char = self.pick_char(char_distrib)
+                out_tweet = torch.cat((out_tweet, torch.squeeze(next_char, 0)), 0)
 
-                # TODO: FINSIH THIS WHEN i CAN DEBUG EASILY
-                pass
+                embed_out = self.embed(next_char)
+                lstm_out, lstm_state = self.lstm(embed_out, lstm_state)
+                char_distrib = self.fc(lstm_out)
 
+            return out_tweet

@@ -19,13 +19,13 @@ def use_model(model_filename):
             print('[1] Generate tweet from scratch.')
             print('[2] Generate tweet given starting input.')
             print(f'[3] Set temperature (current = {temp}).')
-            print('[4] Use file to generate tweets.')
             print('[0] Exit.')
 
         print('Enter selection: ', end='')
 
         print_selection = True
-        selection = input()
+        # selection = input()
+        selection = '2'
 
         if len(selection) != 1:
             print('Invalid selection.')
@@ -35,18 +35,50 @@ def use_model(model_filename):
             done = True
 
         elif selection == '1':
-            pass
+            tweet = generate_tweet(model)
+            print(tweet)
 
         elif selection == '2':
-            pass
+            tweet = generate_tweet(model, start = 'Joe Biden')
+            print(tweet)
 
         elif selection == '3':
             pass
 
-        elif selection == '4':
-            pass
+        else:
+            print('Invalid selection.')
+            print_selection = False
 
     print('Program exiting.')
+
+
+# generate tweet using model. Can use start phrase
+def generate_tweet(model, start = ''):
+
+    # generate tweet
+    with torch.no_grad():
+
+        # completely new tweet
+        if start == '':
+            model_output = model()
+
+        # use start
+        else:
+
+            # convert to tensor format
+            model_input = [ord(char) for char in start]
+            model_input = torch.tensor(model_input)
+            
+            model_output = model(model_input)
+
+    # convert output to string
+    tweet_out = ''
+    for char in model_output:
+        if char == 128:
+            break
+        tweet_out += chr(char)
+
+    return tweet_out
 
 
 # load model
