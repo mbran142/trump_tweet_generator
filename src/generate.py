@@ -1,6 +1,7 @@
 import torch
 import json
 from model import tweet_model
+import pdb
 
 # generate tweets using trained model
 def use_model(model_filename):
@@ -24,9 +25,10 @@ def use_model(model_filename):
         print('Enter selection: ', end='')
 
         print_selection = True
-        # selection = input()
-        selection = '2'
-
+        selection = input()
+        
+        pdb.set_trace()
+        
         if len(selection) != 1:
             print('Invalid selection.')
             print_selection = False
@@ -36,14 +38,19 @@ def use_model(model_filename):
 
         elif selection == '1':
             tweet = generate_tweet(model)
-            print(tweet)
+            print(f'Tweet generated: {tweet}')
 
         elif selection == '2':
-            tweet = generate_tweet(model, start = 'Joe Biden')
-            print(tweet)
+            print('Enter starting input: ', end = '')
+            tweet_start = input()
+            tweet = generate_tweet(model, start = tweet_start)
+            print(f'Tweet generated: {tweet}')
 
         elif selection == '3':
-            pass
+            print('Enter new temperature: ', end = '')
+            new_temp = input()
+            temp = float(new_temp)
+            model.change_temperature(temp)
 
         else:
             print('Invalid selection.')

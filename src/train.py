@@ -91,7 +91,7 @@ def get_loss(model, dataloader, device, optimizer, criterion, batch_size, train 
 
     num_iterations = (len(dataloader.dataset) - 1) // batch_size + 1
     print('Training:' if train else 'Validation:', f'{num_iterations} iterations')
-    print('.' * num_iterations)
+#     print('.' * num_iterations)
 
     loss_val = 0
 
@@ -110,8 +110,8 @@ def get_loss(model, dataloader, device, optimizer, criterion, batch_size, train 
             loss.backward()
             optimizer.step()
 
-        print('.', end = '')
+#         print('.', end = '')
 
-    print('')
+#     print('')
     loss_val = loss_val / (len(dataloader.dataset) / batch_size)
     return loss_val
