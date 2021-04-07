@@ -12,7 +12,8 @@
             "console": "externalTerminal",
             "pythonPath": "${config:python.interpreterPath}",
             "args": [
-                "-t"
+                "-p",
+                "parsed_data.json"
             ]
         }
     ]

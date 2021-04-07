@@ -10,8 +10,8 @@ class tweet_model(nn.Module):
         
         super(tweet_model, self).__init__()
 
-        self.timesteps = 280  # max tweet length is 280
-        self.vocab_size = 129 # 0-127 ASCII, 128 = <pad>
+        self.timesteps = 290  # max tweet length is 280, add 10 due to '&' -> 'and' conversion
+        self.vocab_size = 32
         self.temperature = 0.2
 
         embed_size = config['model']['embedding_size']
@@ -40,7 +40,7 @@ class tweet_model(nn.Module):
         return sample
 
 
-    # expects encoded tweets in 1D tensor form (up to 280 length)
+    # expects encoded tweets in 1D tensor form (up to 290 length)
     def forward(self, encoded_tweet = None, train = False):
 
         # train via teacher forcing
