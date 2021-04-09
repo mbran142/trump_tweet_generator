@@ -52,36 +52,23 @@ class tweet_model(nn.Module):
 
             return fc_out
 
-        # utilize trained model
+        # generate tweet using model
         else:
 
-            # completely new tweet
-            if encoded_tweet is None:
+            start_len = encoded_tweet.shape[0]
 
-                start_len = 0
-                lstm_state = None
-                out_tweet = torch.IntTensor([])
+            # feed in the tweet start and get the lstm state
+            embedded_tweet = self.embed(encoded_tweet)
+            lstm_out, lstm_state = self.lstm(torch.unsqueeze(embedded_tweet, 0))    
+            char_distrib = self.fc(lstm_out)
 
-                # randomly choose an alphabetical character to start with
-                char_distrib = torch.tensor(([0] * 64) + ([1] * 26) + ([0] * 6) + ([1] * 26) + ([0] * 7))
-                char_distrib = torch.unsqueeze(char_distrib, 0)
+            # get last character from distribution
+            char_distrib = torch.squeeze(char_distrib, 0)[-1:]
 
-            # begin tweet with phrase
-            else:
+            next_char = self.pick_char(char_distrib)
+            out_tweet = torch.cat(encoded_tweet, torch.tensor(next_char)) 
 
-                start_len = encoded_tweet.shape[0]
-
-                # feed in the first characters and get the lstm state
-                embedded_tweet = self.embed(encoded_tweet)
-                lstm_out, lstm_state = self.lstm(torch.unsqueeze(embedded_tweet, 0))    
-                char_distrib = self.fc(lstm_out)
-
-                # last character from distribution
-                char_distrib = torch.squeeze(char_distrib, 0)[-1:]
-
-                out_tweet = encoded_tweet
-
-            # generate tweet
+            # generate rest of tweet
             for i in range(self.timesteps - start_len):
                 
                 next_char = self.pick_char(char_distrib)

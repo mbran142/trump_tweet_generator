@@ -44,7 +44,7 @@ def build_tweet_datasets(tweet_filename, ratio = 0.2):
 
 
 # convert string into tensor. Values go from 0-31.
-def string_to_tensor(input):
+def string_to_tensor(input, pad = True):
 
     # encoding:
     # [a-z] = 0-25
@@ -80,9 +80,10 @@ def string_to_tensor(input):
         elif char == '&':
             out_list += [0, 13, 3]  # 'and'
 
-    padding = [ 31 ] * (290 - len(out_list))
-
-    out_list += padding
+    if pad:
+        padding = [ 31 ] * (290 - len(out_list))
+        out_list += padding
+        
     return torch.tensor(out_list)
 
 

@@ -1,6 +1,7 @@
 import torch
 import json
 from model import tweet_model
+from datasets import string_to_tesnor, tensor_to_string
 import pdb
 
 # generate tweets using trained model
@@ -43,8 +44,15 @@ def use_model(model_filename):
         elif selection == '2':
             print('Enter starting input: ', end = '')
             tweet_start = input()
-            tweet = generate_tweet(model, start = tweet_start)
-            print(f'Tweet generated: {tweet}')
+
+            # check input is within size constriaints
+            amp_count = tweet_start.count('&')
+            if len(tweet_start) + amp_count * 2 > 150:
+                print('Too long of a starting input')
+
+            else:
+                tweet = generate_tweet(model, start = tweet_start)
+                print(f'Tweet generated: {tweet}')
 
         elif selection == '3':
             print('Enter new temperature: ', end = '')
@@ -65,18 +73,11 @@ def generate_tweet(model, start = ''):
     # generate tweet
     with torch.no_grad():
 
-        # completely new tweet
-        if start == '':
-            model_output = model()
+        # convert to tensor format
+        model_input = string_to_tesnor(start)
 
-        # use start
-        else:
-
-            # convert to tensor format
-            model_input = [ord(char) for char in start]
-            model_input = torch.tensor(model_input)
-            
-            model_output = model(model_input)
+        # get model output            
+        model_output = model(model_input)
 
     # convert output to string
     tweet_out = ''
