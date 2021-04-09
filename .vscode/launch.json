@@ -13,7 +13,9 @@
             "pythonPath": "${config:python.interpreterPath}",
             "args": [
                 "-p",
-                "parsed_data.json"
+                "parsed_data.json",
+                "-n",
+                "DeepTrump"
             ]
         }
     ]

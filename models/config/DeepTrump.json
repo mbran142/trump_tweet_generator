@@ -1,0 +1,17 @@
+{
+    "training": {
+        "epochs": 40,
+        "learning_rate": 1e-4,
+        "patience": 4,
+        "batch_size": 64
+    },
+    "model": {
+        "embedding_size": 128,
+        "hidden_size_1": 512,
+        "hidden_size_2": 1024,
+        "hidden_size_3": 512,
+        "hidden_size_4": 512,
+        "num_lstm_layers": 3,
+        "lstm_size": 512
+    }
+}

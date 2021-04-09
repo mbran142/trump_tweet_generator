@@ -13,26 +13,22 @@ def build_and_train_model(config_file, parsed_filename):
     try:
         with open('models/config/' + config_file) as f:
             config = json.load(f)
-        if 'training' not in config or 'model' not in config:
-            raise Exception()
-        if 'epochs' not in config['training'] or 'learning_rate' not in config['training'] or 'patience' not in config['training'] or 'batch_size' not in config['training']:
-            raise Exception()
-        if 'hidden_size' not in config['model'] or 'embedding_size' not in config['model'] or 'num_layers' not in config['model']:
-            raise Exception()
+
+        model = tweet_model(config)
+
+        optimizer = torch.optim.Adam(model.parameters(), lr = config['training']['learning_rate']) 
+        criterion = torch.nn.CrossEntropyLoss()
+
+        train_set, val_set = build_tweet_datasets('data/' + parsed_filename)
+        train_dataloader = DataLoader(train_set, shuffle = True, batch_size = config['training']['batch_size'])
+        val_dataloader = DataLoader(val_set, shuffle = True, batch_size = config['training']['batch_size'])
+
     except:
         print(f'Error: {config_file} not in proper format')
         return False
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using \'' + device + '\' for training...')
-
-    model = tweet_model(config)
-    optimizer = torch.optim.Adam(model.parameters(), lr = config['training']['learning_rate']) 
-    criterion = torch.nn.CrossEntropyLoss()
-
-    train_set, val_set = build_tweet_datasets('data/' + parsed_filename)
-    train_dataloader = DataLoader(train_set, shuffle = True, batch_size = config['training']['batch_size'])
-    val_dataloader = DataLoader(val_set, shuffle = True, batch_size = config['training']['batch_size'])
 
     if torch.cuda.is_available():
         model = model.cuda().float()
@@ -91,7 +87,7 @@ def get_loss(model, dataloader, device, optimizer, criterion, batch_size, train 
 
     num_iterations = (len(dataloader.dataset) - 1) // batch_size + 1
     print('Training:' if train else 'Validation:', f'{num_iterations} iterations')
-#     print('.' * num_iterations)
+    print('.' * num_iterations)
 
     loss_val = 0
 
@@ -110,8 +106,8 @@ def get_loss(model, dataloader, device, optimizer, criterion, batch_size, train 
             loss.backward()
             optimizer.step()
 
-#         print('.', end = '')
+        print('.', end = '')
 
-#     print('')
+    print('')
     loss_val = loss_val / (len(dataloader.dataset) / batch_size)
     return loss_val

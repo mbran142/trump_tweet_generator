@@ -1,7 +1,7 @@
 import torch
 import json
 from model import tweet_model
-from datasets import string_to_tesnor, tensor_to_string
+from datasets import string_to_tensor, tensor_to_string
 import pdb
 
 # generate tweets using trained model
@@ -74,17 +74,13 @@ def generate_tweet(model, start = ''):
     with torch.no_grad():
 
         # convert to tensor format
-        model_input = string_to_tesnor(start)
+        model_input = string_to_tesnor(start, pad = False)
 
         # get model output            
         model_output = model(model_input)
 
     # convert output to string
-    tweet_out = ''
-    for char in model_output:
-        if char == 128:
-            break
-        tweet_out += chr(char)
+    tweet_out = tensor_to_string(model_output)
 
     return tweet_out
 
